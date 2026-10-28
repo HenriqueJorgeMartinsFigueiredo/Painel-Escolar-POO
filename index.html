@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Academia</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- cabeçalho de perfil: Gerar painel de resumo -->
+    <header>
+        <h1>Painel da Academia</h1>
+        <nav>
+            <ul>
+                <li><a href="#resumo">Resumo</a></li>
+                <li><a href="#registro">Registrar treino</a></li>
+                <li><a href="#metas">Metas</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!--Resumos-->
+        <section id="resumo" class="resumos">
+            <article class="card">
+                <h2>Aluno</h2>
+                <p id="resumoAluno">Carregando aluno...</p>
+            </article>
+
+            <article class="card">
+                <h2>Personal</h2>
+                <p id="resumoPersonal">Carregando personal...</p>
+            </article>
+        </section>
+
+        <section id="registro" class="card">
+            <h2>Registrar treino</h2>
+
+            <!--Select com as modalidades-->
+            <label for="modalidade">Selecione uma modalidade:</label>
+            <select id="modalidade" name="modalidade">
+                <option value="">-- Selecione --</option>
+                <option value="modalidade1">Musculação</option>
+                <option value="modalidade2">Corrida</option>
+                <option value="modalidade3">Yoga</option>
+            </select>
+
+            <!--Seletor do tipo de treino-->
+            <label for="tipoTreino">Selecione o tipo de treino:</label>
+            <select id="tipoTreino" name="tipoTreino">
+                <option value="">-- Selecione --</option>
+                <option value="forca">Força</option>
+                <option value="cardio">Cardio</option>
+                <option value="alongamento">Alongamento</option>
+            </select>
+
+            <!-- campos numéricos -->
+            <div class="campo-formulario">
+                <label for="minutos">Duração do treino (minutos):</label>
+                <input type="number" id="minutos" name="minutos" min="1" max="300" required>
+            </div>
+
+            <!-- campos que mudam conforme o tipo de treino -->
+            <div class="campo-formulario" id="camposExtras">
+                <label for="dadoExtra" id="labelDadoExtra">Séries completas:</label>
+                <input type="number" id="dadoExtra" name="dadoExtra" min="0" required>
+
+                <div id="campoExtra2">
+                    <label for="dadoExtra2" id="labelDadoExtra2">Carga total levantada (kg):</label>
+                    <input type="number" id="dadoExtra2" name="dadoExtra2" min="0">
+                </div>
+            </div>
+
+            <!--Botão Registrar treino que instancia SessaoTreino-->
+            <button id="registrarTreino">Registrar Treino</button>
+        </section>
+
+        <!--Barra de progresso-->
+        <section id="metas" class="card">
+            <h2>Progresso da meta semanal</h2>
+
+            <div class="barra-progresso">
+                <div id="progressoPreenchido"></div>
+            </div>
+
+            <p id="percentualMeta">0% concluído</p>
+        </section>
+
+        <!-- Lista na tela GerarFeedback-->
+        <section id="feedback">
+            <h2>Feedback</h2>
+            <ul id="listaFeedback">
+                <!-- Os itens de feedback serão adicionados aqui dinamicamente -->
+            </ul>
+        </section>
+
+        <!--Canal e botão Notificar Personal que dispara seu INotificador-->
+        <label for="canal">Canal de notificação:</label>
+        <select id="canal" name="canal">
+            <option value="email">E-mail</option>
+            <option value="whatsapp">WhatsApp</option>
+        </select>
+        <button id="notificarPersonal">Notificar Personal</button>
+        <p id="statusNotificacao"></p>
+    </main>
+
+    <!--Conexão js-->
+    <script src="backend.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
