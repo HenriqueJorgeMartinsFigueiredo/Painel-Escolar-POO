@@ -14,6 +14,7 @@
                 <li><a href="#resumo">Perfis</a></li>
                 <li><a href="#registro">Registrar estudo</a></li>
                 <li><a href="#metas">Meta e histórico</a></li>
+                <li><a href="#servidor">Servidor</a></li>
             </ul>
         </nav>
     </header>
@@ -76,8 +77,9 @@
                 <label for="fezResumo">Fez resumo da leitura</label>
             </div>
 
-            <!-- Instancia a subclasse correta de SessaoEstudo -->
+            <!-- Instancia a subclasse correta de SessaoEstudo e faz POST /api/sessoes -->
             <button id="registrarEstudo">Registrar Estudo</button>
+            <p id="statusRegistro" class="status" aria-live="polite"></p>
         </section>
 
         <!-- 3. Barra de progresso e histórico -->
@@ -105,6 +107,23 @@
                 </select>
                 <button id="notificarResponsavel">Notificar Responsável</button>
                 <p id="statusNotificacao" aria-live="polite"></p>
+            </div>
+        </section>
+
+        <!-- Missão 10: dados gravados no backend C# + MySQL -->
+        <section id="servidor" class="card">
+            <div class="cabecalho-servidor">
+                <h2>Servidor (MySQL)</h2>
+                <span id="statusServidor" class="indicador">Verificando servidor...</span>
+            </div>
+
+            <div class="botoes-servidor">
+                <button id="carregarHistorico">Carregar Histórico do Servidor</button>
+                <button id="carregarRelatorio" class="secundario">Relatório do Discente</button>
+            </div>
+
+            <div id="resultadoServidor" aria-live="polite">
+                <p class="vazio">Clique em um dos botões para ver os dados gravados no banco.</p>
             </div>
         </section>
     </main>

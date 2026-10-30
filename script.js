@@ -1,3 +1,25 @@
+// Interface IExportavelJson
+// (declarada no topo porque MetaEstudo e SessaoEstudo a implementam)
+class IExportavelJson {
+    constructor() {
+        if (new.target === IExportavelJson) {
+            throw new Error("Interface não pode ser instanciada!");
+        }
+    }
+
+    ParaJson() {
+        throw new Error("Método ParaJson deve ser implementado!");
+    }
+}
+
+// Função para verificar se um objeto implementa a interface IExportavelJson
+function verificarExportavelJson(obj) {
+    return obj !== null
+        && typeof obj === "object"
+        && typeof obj.ParaJson === "function";
+}
+
+
 // Passo 1: Conceito de Abstração
 
 // classe Disciplina
@@ -65,12 +87,13 @@ const disciplinas = {
 
 // Passo 2: Encapsulamento
 
-// Classe MetaEstudo com campos privados
-class MetaEstudo {
+// Classe MetaEstudo com campos privados (implementa IExportavelJson)
+class MetaEstudo extends IExportavelJson {
     #metaMinutosSemana;
     #minutosCumpridos;
 
     constructor(metaMinutosSemana) {
+        super();
         this.#minutosCumpridos = 0;
         this.RedefinirMeta(metaMinutosSemana);
     }
@@ -114,7 +137,7 @@ class MetaEstudo {
         return this.#metaMinutosSemana;
     }
 
-    // Passo 6: exportação para JSON
+    // IExportavelJson: exportação para JSON
     ParaJson() {
         return JSON.stringify({
             metaMinutosSemana: this.#metaMinutosSemana,
@@ -151,10 +174,48 @@ class Usuario {
             throw new Error("Classe abstrata!");
         }
 
+        // Validações contra dados inválidos
+        if (!Number.isInteger(id) || id <= 0) {
+            throw new Error("Id inválido: deve ser um inteiro maior que zero.");
+        }
+        if (typeof nome !== "string" || nome.trim().length < 2) {
+            throw new Error("Nome inválido: informe pelo menos 2 letras.");
+        }
+        if (!Usuario.#EmailValido(email)) {
+            throw new Error("E-mail inválido.");
+        }
+        if (!Usuario.#SenhaValida(senha)) {
+            throw new Error("Senha inválida: mínimo de 6 caracteres.");
+        }
+
         this.#id = id;
-        this.#nome = nome;
-        this.#email = email;
+        this.#nome = nome.trim();
+        this.#email = email.trim();
         this.#senha = senha;
+    }
+
+    static #EmailValido(email) {
+        return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    }
+
+    static #SenhaValida(senha) {
+        return typeof senha === "string" && senha.length >= 6;
+    }
+
+    AlterarEmail(novoEmail) {
+        if (!Usuario.#EmailValido(novoEmail)) {
+            return false;
+        }
+        this.#email = novoEmail.trim();
+        return true;
+    }
+
+    AlterarSenha(senhaAtual, novaSenha) {
+        if (!this.Autenticar(senhaAtual) || !Usuario.#SenhaValida(novaSenha)) {
+            return false;
+        }
+        this.#senha = novaSenha;
+        return true;
     }
 
     GetId() {
@@ -200,7 +261,8 @@ class Administrador extends Usuario {
 }
 
 class Responsavel extends Usuario {
-    // Passo 7: lista de discentes acompanhados
+    // Passo 7 - ASSOCIAÇÃO: o Responsável conhece os Discentes que acompanha,
+    // mas os dois existem de forma independente.
     #discentesAcompanhados = [];
 
     constructor(id, nome, email, parentesco, senha) {
@@ -317,12 +379,13 @@ responsavel.VincularDiscente(discente);
 
 // Passo 4: Polimorfismo
 
-// Classe abstrata SessaoEstudo
-class SessaoEstudo {
+// Classe abstrata SessaoEstudo (implementa IExportavelJson)
+class SessaoEstudo extends IExportavelJson {
     #disciplina;
     #duracaoMinutos;
 
     constructor(disciplina, duracaoMinutos) {
+        super();
         if (new.target === SessaoEstudo) {
             throw new Error("Classe abstrata!");
         }
@@ -351,13 +414,14 @@ class SessaoEstudo {
         return `${this.ObterModalidade()} em ${this.#disciplina.GetNome()} (${this.#duracaoMinutos} min) -> +${this.CalcularXp()} XP`;
     }
 
-    // Passo 6: exportação para JSON
+    // IExportavelJson: exportação para JSON (mesmo formato que o backend recebe)
     ParaJson() {
         return JSON.stringify({
             disciplina: this.GetDisciplina().GetNome(),
-            modalidade: this.ObterModalidade(),
+            tipoModalidade: this.ObterModalidade(),
             duracaoMinutos: this.GetDuracaoMinutos(),
-            xp: this.CalcularXp()
+            xpGanho: this.CalcularXp(),
+            resumoFeedback: this.GerarFeedback()
         });
     }
 }
@@ -443,6 +507,13 @@ sessoes.forEach(sessao => {
 
 console.log(`XP Total: ${xpTotal}`);
 
+// Uso da interface IExportavelJson
+[meta, ...sessoes].forEach(objeto => {
+    if (verificarExportavelJson(objeto)) {
+        console.log(objeto.ParaJson());
+    }
+});
+
 
 // Passo 6
 
@@ -497,7 +568,11 @@ const notificadores = {
 };
 
 
-// Passo 7: Associação
+// Passo 7: Relacionamentos
+
+// AGREGAÇÃO: a TrilhaEstudo reúne Disciplinas que já existem fora dela
+// (se a trilha for apagada, as disciplinas continuam existindo).
+// ASSOCIAÇÃO: a trilha guarda o Administrador que a criou.
 class TrilhaEstudo {
     #disciplinas = [];
 
@@ -535,6 +610,8 @@ console.log(`${trilha.titulo}: ${trilha.CalcularCargaHorariaTotal()}h/semana`);
 
 // Passo 8: Composição
 
+// COMPOSIÇÃO: o PlanoEstudo cria e é dono dos seus ItemCronograma
+// (os itens não existem fora do plano).
 class ItemCronograma {
     constructor(diaSemana, minutosPlanejados) {
         this.diaSemana = diaSemana;
@@ -562,6 +639,8 @@ plano.AdicionarItem("Sexta", 60);
 console.log(`Plano semanal: ${plano.CalcularMinutosPlanejados()} min`);
 
 
+// DEPENDÊNCIA: o serviço usa Discente, MetaEstudo, Responsavel e INotificador
+// apenas como parâmetros do método, sem guardar referência a eles.
 class ServicoAlertaResponsavel {
     AvaliarDiscente(discente, meta, responsavel, notificador) {
         if (!verificarNotificador(notificador)) {
@@ -589,8 +668,9 @@ const servicoAlerta = new ServicoAlertaResponsavel();
 
 
 // Missão 9: Interface gráfica (HTML + CSS + DOM)
+// Missão 10: tela conectada ao backend C# + MySQL
 
-const conectorBackend = new ConectorBackend();
+const clienteBackend = new ClienteBackendEstudo("http://localhost:5080");
 
 // 1. Cabeçalho de perfil: resultado polimórfico de GerarPainelResumo()
 function atualizarResumos() {
@@ -740,17 +820,24 @@ document.getElementById("registrarEstudo").addEventListener("click", async () =>
     atualizarHistorico();
     limparFormulario();
 
-    // 5. Salvar no backend C# (opcional: sem o servidor, só aparece erro no console)
+    // 5. Missão 10: POST /api/sessoes no backend C# (MySQL)
+    const statusRegistro = document.getElementById("statusRegistro");
+    statusRegistro.className = "status";
+    statusRegistro.textContent = "Enviando sessão para o servidor...";
+
     try {
-        const resultado = await conectorBackend.salvarSessaoNoBanco(
-            discente.GetNome(),
-            sessao
-        );
+        const resultado = await clienteBackend.SalvarSessao(discente, sessao);
 
         console.log("Sessão salva no servidor:", resultado);
+        statusRegistro.className = "status sucesso";
+        statusRegistro.textContent = "Sessão registrada e salva no MySQL.";
+        atualizarStatusServidor(true);
 
     } catch (erro) {
         console.error("Erro ao salvar no servidor:", erro);
+        statusRegistro.className = "status erro";
+        statusRegistro.textContent = `Sessão registrada só na tela. ${erro.message}`;
+        atualizarStatusServidor(false);
     }
 });
 
@@ -765,3 +852,152 @@ document.getElementById("notificarResponsavel").addEventListener("click", () => 
         ? `Alerta enviado para ${responsavel.GetNome()} via ${notificador.ObterCanal()}.`
         : "Não foi possível enviar o alerta.";
 });
+
+
+// Missão 10: dados gravados no servidor
+
+// Nomes amigáveis para as colunas que o backend devolve
+const nomesColunas = {
+    id: "Id",
+    discenteNome: "Discente",
+    disciplina: "Disciplina",
+    tipoModalidade: "Modalidade",
+    duracaoMinutos: "Minutos",
+    xpGanho: "XP",
+    resumoFeedback: "Feedback",
+    dataRegistro: "Data",
+    totalSessoes: "Total de sessões",
+    totalMinutos: "Total de minutos",
+    xpTotal: "XP total"
+};
+
+function nomeColuna(chave) {
+    const chaveCamel = chave.charAt(0).toLowerCase() + chave.slice(1);
+    return nomesColunas[chaveCamel] || chave;
+}
+
+function formatarValor(valor) {
+    if (valor === null || valor === undefined) {
+        return "-";
+    }
+    if (typeof valor === "object") {
+        return JSON.stringify(valor);
+    }
+    return String(valor);
+}
+
+// Mostra na tela o que o servidor devolveu (lista, objeto ou texto)
+function exibirDadosServidor(titulo, dados) {
+    const area = document.getElementById("resultadoServidor");
+    area.innerHTML = "";
+
+    const h3 = document.createElement("h3");
+    h3.textContent = titulo;
+    area.appendChild(h3);
+
+    // Lista de registros -> tabela
+    if (Array.isArray(dados)) {
+        if (dados.length === 0) {
+            const vazio = document.createElement("p");
+            vazio.className = "vazio";
+            vazio.textContent = "Nenhum registro no banco ainda.";
+            area.appendChild(vazio);
+            return;
+        }
+
+        const colunas = [...new Set(dados.flatMap(registro =>
+            registro && typeof registro === "object" ? Object.keys(registro) : ["valor"]
+        ))];
+
+        const tabela = document.createElement("table");
+        const cabecalho = tabela.createTHead().insertRow();
+        colunas.forEach(coluna => {
+            const th = document.createElement("th");
+            th.textContent = nomeColuna(coluna);
+            cabecalho.appendChild(th);
+        });
+
+        const corpo = tabela.createTBody();
+        dados.forEach(registro => {
+            const linha = corpo.insertRow();
+            colunas.forEach(coluna => {
+                const valor = registro && typeof registro === "object" ? registro[coluna] : registro;
+                linha.insertCell().textContent = formatarValor(valor);
+            });
+        });
+
+        const rolagem = document.createElement("div");
+        rolagem.className = "tabela-rolagem";
+        rolagem.appendChild(tabela);
+        area.appendChild(rolagem);
+
+        const total = document.createElement("p");
+        total.className = "total-registros";
+        total.textContent = `${dados.length} registro(s) no banco.`;
+        area.appendChild(total);
+        return;
+    }
+
+    // Objeto (ex.: relatório) -> lista de campo: valor
+    if (dados && typeof dados === "object") {
+        const lista = document.createElement("dl");
+        Object.entries(dados).forEach(([chave, valor]) => {
+            const dt = document.createElement("dt");
+            dt.textContent = nomeColuna(chave);
+            const dd = document.createElement("dd");
+            dd.textContent = formatarValor(valor);
+            lista.append(dt, dd);
+        });
+        area.appendChild(lista);
+        return;
+    }
+
+    // Texto simples
+    const p = document.createElement("p");
+    p.textContent = formatarValor(dados);
+    area.appendChild(p);
+}
+
+function exibirErroServidor(mensagem) {
+    const area = document.getElementById("resultadoServidor");
+    area.innerHTML = "";
+    const p = document.createElement("p");
+    p.className = "status erro";
+    p.textContent = mensagem;
+    area.appendChild(p);
+}
+
+function atualizarStatusServidor(online) {
+    const status = document.getElementById("statusServidor");
+    status.className = online ? "indicador online" : "indicador offline";
+    status.textContent = online
+        ? `Servidor online (${clienteBackend.GetUrlBase()})`
+        : `Servidor offline (${clienteBackend.GetUrlBase()})`;
+}
+
+// Botão "Carregar Histórico do Servidor": GET /api/sessoes
+document.getElementById("carregarHistorico").addEventListener("click", async () => {
+    try {
+        const sessoesSalvas = await clienteBackend.ListarSessoes();
+        exibirDadosServidor("Sessões gravadas no MySQL", sessoesSalvas);
+        atualizarStatusServidor(true);
+    } catch (erro) {
+        exibirErroServidor(erro.message);
+        atualizarStatusServidor(false);
+    }
+});
+
+// Botão "Relatório do Discente": GET /api/relatorio/{nomeDiscente}
+document.getElementById("carregarRelatorio").addEventListener("click", async () => {
+    try {
+        const relatorio = await clienteBackend.GerarRelatorio(discente.GetNome());
+        exibirDadosServidor(`Relatório de ${discente.GetNome()}`, relatorio);
+        atualizarStatusServidor(true);
+    } catch (erro) {
+        exibirErroServidor(erro.message);
+        atualizarStatusServidor(false);
+    }
+});
+
+// Ao abrir a página, verifica se o backend está no ar
+clienteBackend.VerificarServidor().then(atualizarStatusServidor);
