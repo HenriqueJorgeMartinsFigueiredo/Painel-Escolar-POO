@@ -1,23 +1,23 @@
 class ConectorBackend {
     #urlBase = "http://localhost:5080";
 
-    // 1. Exemplo de GET: Buscar todos os treinos salvos no MySQL
-    async listarTreinos() {
-        const resposta = await fetch(`${this.#urlBase}/api/treinos`);
+    // 1. Exemplo de GET: Buscar todas as sessões de estudo salvas no MySQL
+    async listarSessoes() {
+        const resposta = await fetch(`${this.#urlBase}/api/sessoes`);
         return await resposta.json();
     }
 
-    // 2. Exemplo de POST: Enviar um treino concluído
-    async salvarTreinoNoBanco(nomeAluno, sessao) {
-        const resposta = await fetch(`${this.#urlBase}/api/treinos`, {
+    // 2. Exemplo de POST: Enviar uma sessão de estudo concluída
+    async salvarSessaoNoBanco(nomeDiscente, sessao) {
+        const resposta = await fetch(`${this.#urlBase}/api/sessoes`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                alunoNome: nomeAluno,
-                modalidade: sessao.GetModalidade().GetNome(),
-                tipoTreino: sessao.ObterTipoTreino(),
+                discenteNome: nomeDiscente,
+                disciplina: sessao.GetDisciplina().GetNome(),
+                modalidade: sessao.ObterModalidade(),
                 duracaoMinutos: sessao.GetDuracaoMinutos(),
-                pontosGanhos: sessao.CalcularPontos(),
+                xpGanho: sessao.CalcularXp(),
                 resumoFeedback: sessao.GerarFeedback()
             })
         });

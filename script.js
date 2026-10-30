@@ -1,16 +1,16 @@
 // Passo 1: Conceito de Abstração
 
-// classe Modalidade
-class Modalidade {
-    constructor(codigo, nome, categoria, frequenciaSemanalHoras) {
+// classe Disciplina
+class Disciplina {
+    constructor(codigo, nome, categoria, cargaHorariaSemanalHoras) {
         this.codigo = codigo;
         this.nome = nome;
         this.categoria = categoria;
 
-        if (frequenciaSemanalHoras <= 0) {
-            this.frequenciaSemanalHoras = 2;
+        if (cargaHorariaSemanalHoras <= 0) {
+            this.cargaHorariaSemanalHoras = 2;
         } else {
-            this.frequenciaSemanalHoras = frequenciaSemanalHoras;
+            this.cargaHorariaSemanalHoras = cargaHorariaSemanalHoras;
         }
     }
 
@@ -18,12 +18,12 @@ class Modalidade {
         return this.nome;
     }
 
-    CalcularFrequenciaEmMinutos() {
-        return this.frequenciaSemanalHoras * 60;
+    CalcularCargaEmMinutos() {
+        return this.cargaHorariaSemanalHoras * 60;
     }
 
     ExibirResumo() {
-        return `[${this.codigo}] ${this.nome} (${this.categoria}) — ${this.frequenciaSemanalHoras}h/semana (${this.CalcularFrequenciaEmMinutos()} min)`;
+        return `[${this.codigo}] ${this.nome} (${this.categoria}) — ${this.cargaHorariaSemanalHoras}h/semana (${this.CalcularCargaEmMinutos()} min)`;
     }
 }
 
@@ -31,41 +31,42 @@ class Modalidade {
 // Como utilizar a classe:
 
 // Criando três instâncias
-const modalidade1 = new Modalidade(
-    "ACD101",
-    "Musculação",
-    "Força",
+const disciplina1 = new Disciplina(
+    "ADS101",
+    "Programação Orientada a Objetos",
+    "Programação",
     4
 );
-console.log(modalidade1.ExibirResumo());
+console.log(disciplina1.ExibirResumo());
 
-const modalidade2 = new Modalidade(
-    "ACD102",
-    "Corrida",
-    "Cardio",
+const disciplina2 = new Disciplina(
+    "ADS102",
+    "Banco de Dados",
+    "Dados",
     3
 );
-console.log(modalidade2.ExibirResumo());
+console.log(disciplina2.ExibirResumo());
 
-const modalidade3 = new Modalidade(
-    "ACD103",
-    "Yoga",
-    "Flexibilidade",
+const disciplina3 = new Disciplina(
+    "ADS103",
+    "Matemática Discreta",
+    "Exatas",
     2
 );
-console.log(modalidade3.ExibirResumo());
+console.log(disciplina3.ExibirResumo());
 
-const modalidades = {
-    modalidade1: modalidade1,
-    modalidade2: modalidade2,
-    modalidade3: modalidade3
+// Usado pelo <select> de disciplinas da tela
+const disciplinas = {
+    disciplina1: disciplina1,
+    disciplina2: disciplina2,
+    disciplina3: disciplina3
 };
 
 
 // Passo 2: Encapsulamento
 
-// Classe MetaTreino privada
-class MetaTreino {
+// Classe MetaEstudo com campos privados
+class MetaEstudo {
     #metaMinutosSemana;
     #minutosCumpridos;
 
@@ -109,6 +110,10 @@ class MetaTreino {
         return this.#minutosCumpridos;
     }
 
+    GetMetaMinutosSemana() {
+        return this.#metaMinutosSemana;
+    }
+
     // Passo 6: exportação para JSON
     ParaJson() {
         return JSON.stringify({
@@ -121,7 +126,7 @@ class MetaTreino {
 }
 
 // Teste de mesa
-const meta = new MetaTreino(300);
+const meta = new MetaEstudo(300);
 
 console.log(meta.RegistrarAvanco(-20));      // false: valor inválido
 console.log(meta.GetMinutosCumpridos());     // 0
@@ -194,109 +199,108 @@ class Administrador extends Usuario {
     }
 }
 
-class Personal extends Usuario {
-    constructor(id, nome, email, cref, senha) {
+class Responsavel extends Usuario {
+    // Passo 7: lista de discentes acompanhados
+    #discentesAcompanhados = [];
+
+    constructor(id, nome, email, parentesco, senha) {
         super(id, nome, email, senha);
-        this.cref = cref;
+        this.parentesco = parentesco;
     }
     // sobrescrever ObterTipoPerfil
     ObterTipoPerfil() {
-        return "Personal";
+        return "Responsável";
     }
     // sobrescrever GerarPainelResumo
     GerarPainelResumo() {
-        return `Personal: ${this.GetNome()} - CREF: ${this.cref} - Alunos: ${this.#alunosAcompanhados.length}`;
+        return `Responsável: ${this.GetNome()} - Parentesco: ${this.parentesco} - Discentes acompanhados: ${this.#discentesAcompanhados.length}`;
     }
 
-    // Passo 7
-
-    #alunosAcompanhados = [];
-    // Método VincularAluno
-    VincularAluno(aluno) {
-        if (!(aluno instanceof Aluno)) {
+    // Método VincularDiscente
+    VincularDiscente(discente) {
+        if (!(discente instanceof Discente)) {
             return false;
         }
 
-        if (this.#alunosAcompanhados.includes(aluno)) {
+        if (this.#discentesAcompanhados.includes(discente)) {
             return false;
         }
 
-        this.#alunosAcompanhados.push(aluno);
+        this.#discentesAcompanhados.push(discente);
         return true;
     }
 }
 
-class Aluno extends Usuario {
-    constructor(id, nome, email, matricula, senha) {
+class Discente extends Usuario {
+    // Lista privada com o histórico de sessões de estudo
+    #historicoSessoes = [];
+
+    constructor(id, nome, email, ra, senha) {
         super(id, nome, email, senha);
-        this.matricula = matricula;
-        this.pontosTotal = 0;
+        this.ra = ra;
+        this.xpTotal = 0;
     }
     // sobrescrever ObterTipoPerfil
     ObterTipoPerfil() {
-        return "Aluno";
+        return "Discente";
     }
     // sobrescrever GerarPainelResumo
     GerarPainelResumo() {
-        return `Aluno: ${this.GetNome()} - Matrícula: ${this.matricula} - Pontos: ${this.pontosTotal}`;
+        return `Discente: ${this.GetNome()} - RA: ${this.ra} - XP: ${this.xpTotal}`;
     }
 
-    // Passo 5: Polimorfismo estático
-
-    // Lista privada histórico de treinos
-    #historicoTreinos = [];
-
-    RegistrarTreino(arg1, arg2, arg3, arg4) {
-        if (arg1 instanceof SessaoTreino) {
+    // Passo 5: Polimorfismo estático (sobrecarga simulada)
+    RegistrarEstudo(arg1, arg2, arg3, arg4) {
+        if (arg1 instanceof SessaoEstudo) {
             // Forma 1: com a sessão pronta
             const sessao = arg1;
 
-            this.#historicoTreinos.push(sessao);
-            this.pontosTotal += sessao.CalcularPontos();
+            this.#historicoSessoes.push(sessao);
+            this.xpTotal += sessao.CalcularXp();
 
-        } else if (arg1 instanceof Modalidade && arg3 === undefined && arg4 === undefined) {
-            // Forma 2: cria TreinoForca estimando séries (1 série a cada 5 min)
-            const modalidade = arg1;
+        } else if (arg1 instanceof Disciplina && arg3 === undefined && arg4 === undefined) {
+            // Forma 2: cria SessaoPomodoro estimando os ciclos (1 ciclo a cada 25 min)
+            const disciplina = arg1;
             const minutos = arg2;
 
-            const series = Math.max(1, Math.floor(minutos / 5));
+            const ciclos = Math.max(1, Math.floor(minutos / 25));
 
-            this.RegistrarTreino(new TreinoForca(modalidade, minutos, series, 0));
+            this.RegistrarEstudo(new SessaoPomodoro(disciplina, minutos, ciclos));
 
-        } else if (arg1 instanceof Modalidade && arg3 !== undefined && arg4 !== undefined) {
-            // Forma 3: por horário, cria TreinoCardio
-            const modalidade = arg1;
+        } else if (arg1 instanceof Disciplina && arg3 !== undefined && arg4 !== undefined) {
+            // Forma 3: por horário, cria SessaoLeitura
+            const disciplina = arg1;
             const horaInicio = arg2;
             const horaFim = arg3;
-            const distanciaKm = arg4;
+            const paginasLidas = arg4;
 
             const minutos = (horaFim - horaInicio) * 60;
 
-            this.RegistrarTreino(new TreinoCardio(modalidade, minutos, distanciaKm));
+            this.RegistrarEstudo(new SessaoLeitura(disciplina, minutos, paginasLidas, false));
 
         } else {
             throw new Error("Argumentos inválidos!");
         }
     }
 
-    GetHistoricoTreinos() {
-        return [...this.#historicoTreinos];
+    GetHistoricoSessoes() {
+        return [...this.#historicoSessoes];
     }
 }
 
-const aluno = new Aluno(
+const discente = new Discente(
     1,
     "Lucas",
     "lucas@email.com",
-    "MAT001",
+    "RA001",
     "123456"
 );
 
-const personal = new Personal(
+const responsavel = new Responsavel(
     2,
     "Carla",
     "carla@email.com",
-    "123456-G/SP",
+    "Mãe",
     "123456"
 );
 
@@ -304,140 +308,140 @@ const administrador = new Administrador(
     3,
     "Roberto",
     "roberto@email.com",
-    "Gerente",
+    "Coordenador",
     "123456"
 );
 
-personal.VincularAluno(aluno);
+responsavel.VincularDiscente(discente);
 
 
 // Passo 4: Polimorfismo
 
-// Classe SessaoTreino
-class SessaoTreino {
-    #modalidade;
+// Classe abstrata SessaoEstudo
+class SessaoEstudo {
+    #disciplina;
     #duracaoMinutos;
 
-    constructor(modalidade, duracaoMinutos) {
-        if (new.target === SessaoTreino) {
+    constructor(disciplina, duracaoMinutos) {
+        if (new.target === SessaoEstudo) {
             throw new Error("Classe abstrata!");
         }
-        this.#modalidade = modalidade;
+        this.#disciplina = disciplina;
         this.#duracaoMinutos = duracaoMinutos;
     }
 
-    GetModalidade() {
-        return this.#modalidade;
+    GetDisciplina() {
+        return this.#disciplina;
     }
 
     GetDuracaoMinutos() {
         return this.#duracaoMinutos;
     }
 
-    ObterTipoTreino() {
+    ObterModalidade() {
         throw new Error("Método abstrato!");
     }
 
-    CalcularPontos() {
+    CalcularXp() {
         throw new Error("Método abstrato!");
     }
 
     // Método virtual
     GerarFeedback() {
-        return `${this.ObterTipoTreino()} em ${this.#modalidade.GetNome()} (${this.#duracaoMinutos} min) -> +${this.CalcularPontos()} pontos`;
+        return `${this.ObterModalidade()} em ${this.#disciplina.GetNome()} (${this.#duracaoMinutos} min) -> +${this.CalcularXp()} XP`;
     }
 
     // Passo 6: exportação para JSON
     ParaJson() {
         return JSON.stringify({
-            modalidade: this.GetModalidade().GetNome(),
-            tipoTreino: this.ObterTipoTreino(),
+            disciplina: this.GetDisciplina().GetNome(),
+            modalidade: this.ObterModalidade(),
             duracaoMinutos: this.GetDuracaoMinutos(),
-            pontos: this.CalcularPontos()
+            xp: this.CalcularXp()
         });
     }
 }
 
-// Três subclasses concretas de SessaoTreino
-class TreinoForca extends SessaoTreino {
-    constructor(modalidade, duracaoMinutos, seriesCompletas, cargaTotalKg) {
-        super(modalidade, duracaoMinutos);
-        this.seriesCompletas = seriesCompletas;
-        this.cargaTotalKg = cargaTotalKg;
+// Três subclasses concretas de SessaoEstudo
+class SessaoPomodoro extends SessaoEstudo {
+    constructor(disciplina, duracaoMinutos, ciclosCompletos) {
+        super(disciplina, duracaoMinutos);
+        this.ciclosCompletos = ciclosCompletos;
     }
 
-    ObterTipoTreino() {
-        return "Força";
+    ObterModalidade() {
+        return "Pomodoro";
     }
 
-    CalcularPontos() {
-        return this.GetDuracaoMinutos() * 2 + (this.seriesCompletas * 5) + Math.floor(this.cargaTotalKg / 100);
+    CalcularXp() {
+        return this.GetDuracaoMinutos() * 2 + (this.ciclosCompletos * 15);
     }
 
     GerarFeedback() {
-        return `${super.GerarFeedback()} - Séries: ${this.seriesCompletas} - Carga total: ${this.cargaTotalKg} kg`;
+        return `${super.GerarFeedback()} - Ciclos completos: ${this.ciclosCompletos}`;
     }
 }
 
-class TreinoCardio extends SessaoTreino {
-    constructor(modalidade, duracaoMinutos, distanciaKm) {
-        super(modalidade, duracaoMinutos);
-        this.distanciaKm = distanciaKm;
+class SessaoExercicios extends SessaoEstudo {
+    constructor(disciplina, duracaoMinutos, acertos, totalQuestoes) {
+        super(disciplina, duracaoMinutos);
+        this.acertos = acertos;
+        this.totalQuestoes = totalQuestoes;
     }
 
-    ObterTipoTreino() {
-        return "Cardio";
+    ObterModalidade() {
+        return "Exercícios";
     }
 
-    CalcularPontos() {
-        return this.GetDuracaoMinutos() + Math.round(this.distanciaKm * 20);
+    CalcularXp() {
+        return this.GetDuracaoMinutos() + (this.acertos * 10);
     }
 
-    // Feedback com ritmo médio
+    // Feedback com o aproveitamento em porcentagem
     GerarFeedback() {
-        const ritmo = this.distanciaKm > 0
-            ? this.GetDuracaoMinutos() / this.distanciaKm
+        const aproveitamento = this.totalQuestoes > 0
+            ? (this.acertos / this.totalQuestoes) * 100
             : 0;
         // O toFixed(1) limita a uma casa decimal
-        return `${super.GerarFeedback()} - Distância: ${this.distanciaKm} km - Ritmo: ${ritmo.toFixed(1)} min/km`;
+        return `${super.GerarFeedback()} - Acertos: ${this.acertos}/${this.totalQuestoes} (${aproveitamento.toFixed(1)}%)`;
     }
 }
 
-class TreinoAlongamento extends SessaoTreino {
-    constructor(modalidade, duracaoMinutos, posturas, fezRelaxamento) {
-        super(modalidade, duracaoMinutos);
-        this.posturas = posturas;
-        this.fezRelaxamento = fezRelaxamento;
+class SessaoLeitura extends SessaoEstudo {
+    constructor(disciplina, duracaoMinutos, paginasLidas, fezResumo) {
+        super(disciplina, duracaoMinutos);
+        this.paginasLidas = paginasLidas;
+        this.fezResumo = fezResumo;
     }
 
-    ObterTipoTreino() {
-        return "Alongamento";
+    ObterModalidade() {
+        return "Leitura";
     }
 
-    CalcularPontos() {
-        return this.GetDuracaoMinutos() + (this.posturas * 3) + (this.fezRelaxamento ? 20 : 0);
+    CalcularXp() {
+        return this.GetDuracaoMinutos() + (this.paginasLidas * 3) + (this.fezResumo ? 25 : 0);
     }
 
     GerarFeedback() {
-        return `${super.GerarFeedback()} - Posturas: ${this.posturas} - Relaxamento: ${this.fezRelaxamento ? "Sim" : "Não"}`;
+        return `${super.GerarFeedback()} - Páginas lidas: ${this.paginasLidas} - Resumo feito: ${this.fezResumo ? "Sim" : "Não"}`;
     }
 }
 
-// Array de sessões de treino
+// Array de sessões de estudo
 const sessoes = [
-    new TreinoForca(modalidade1, 60, 12, 3500),
-    new TreinoCardio(modalidade2, 30, 5),
-    new TreinoAlongamento(modalidade3, 45, 15, true)
+    new SessaoPomodoro(disciplina1, 50, 2),
+    new SessaoExercicios(disciplina2, 40, 18, 20),
+    new SessaoLeitura(disciplina3, 30, 15, true)
 ];
 
-let pontosTotal = 0;
-// Percorrer o array com um único forEach, com feedback de pontos
+let xpTotal = 0;
+// Percorrer o array com um único forEach, com feedback de XP
 sessoes.forEach(sessao => {
     console.log(sessao.GerarFeedback());
-    pontosTotal += sessao.CalcularPontos();
+    xpTotal += sessao.CalcularXp();
 });
 
-console.log(`Pontos Total: ${pontosTotal}`);
+console.log(`XP Total: ${xpTotal}`);
 
 
 // Passo 6
@@ -452,13 +456,21 @@ class INotificador {
     }
 }
 
+// Mostra o alerta na tela (no navegador) e no console
+function exibirAlertaNaTela(texto) {
+    console.log(texto);
+    if (typeof alert === "function") {
+        alert(texto);
+    }
+}
+
 // Classes que assinam a interface
 class NotificadorEmail extends INotificador {
     ObterCanal() {
         return "E-mail";
     }
     EnviarAlerta(destinatario, mensagem) {
-        console.log(`Enviando alerta por e-mail para ${destinatario}: ${mensagem}`);
+        exibirAlertaNaTela(`📧 E-mail enviado para ${destinatario}:\n\n${mensagem}`);
         return true;
     }
 }
@@ -468,7 +480,7 @@ class NotificadorWhatsApp extends INotificador {
         return "WhatsApp";
     }
     EnviarAlerta(destinatario, mensagem) {
-        console.log(`Enviando alerta por WhatsApp para ${destinatario}: ${mensagem}`);
+        exibirAlertaNaTela(`💬 WhatsApp enviado para ${destinatario}:\n\n${mensagem}`);
         return true;
     }
 }
@@ -486,39 +498,39 @@ const notificadores = {
 
 
 // Passo 7: Associação
-class FichaTreino {
-    #modalidades = [];
+class TrilhaEstudo {
+    #disciplinas = [];
 
     constructor(titulo, administrador) {
         this.titulo = titulo;
         this.administrador = administrador;
     }
 
-    AdicionarModalidade(modalidade) {
-        if (modalidade instanceof Modalidade) {
-            this.#modalidades.push(modalidade);
+    AdicionarDisciplina(disciplina) {
+        if (disciplina instanceof Disciplina) {
+            this.#disciplinas.push(disciplina);
             return true;
         }
 
         return false;
     }
 
-    CalcularFrequenciaTotal() {
+    CalcularCargaHorariaTotal() {
         let totalHoras = 0;
 
-        for (const modalidade of this.#modalidades) {
-            totalHoras += modalidade.CalcularFrequenciaEmMinutos() / 60;
+        for (const disciplina of this.#disciplinas) {
+            totalHoras += disciplina.CalcularCargaEmMinutos() / 60;
         }
 
         return totalHoras;
     }
 }
 
-const ficha = new FichaTreino("Ficha A - Iniciante", administrador);
-ficha.AdicionarModalidade(modalidade1);
-ficha.AdicionarModalidade(modalidade2);
-ficha.AdicionarModalidade(modalidade3);
-console.log(`${ficha.titulo}: ${ficha.CalcularFrequenciaTotal()}h/semana`);
+const trilha = new TrilhaEstudo("Trilha ADS - 1º semestre", administrador);
+trilha.AdicionarDisciplina(disciplina1);
+trilha.AdicionarDisciplina(disciplina2);
+trilha.AdicionarDisciplina(disciplina3);
+console.log(`${trilha.titulo}: ${trilha.CalcularCargaHorariaTotal()}h/semana`);
 
 
 // Passo 8: Composição
@@ -530,7 +542,7 @@ class ItemCronograma {
     }
 }
 
-class PlanoTreino {
+class PlanoEstudo {
     #itensCronograma = [];
 
     AdicionarItem(diaSemana, minutosPlanejados) {
@@ -543,15 +555,15 @@ class PlanoTreino {
     }
 }
 
-const plano = new PlanoTreino();
+const plano = new PlanoEstudo();
 plano.AdicionarItem("Segunda", 60);
 plano.AdicionarItem("Quarta", 60);
 plano.AdicionarItem("Sexta", 60);
 console.log(`Plano semanal: ${plano.CalcularMinutosPlanejados()} min`);
 
 
-class ServicoAlertaPersonal {
-    AvaliarAluno(aluno, meta, personal, notificador) {
+class ServicoAlertaResponsavel {
+    AvaliarDiscente(discente, meta, responsavel, notificador) {
         if (!verificarNotificador(notificador)) {
             throw new Error("Notificador inválido!");
         }
@@ -561,161 +573,195 @@ class ServicoAlertaPersonal {
         let mensagem;
 
         if (percentual >= 100) {
-            mensagem = `Parabéns! ${aluno.GetNome()} atingiu 100% da meta de treino!`;
+            mensagem = `Parabéns! ${discente.GetNome()} atingiu 100% da meta de estudos da semana (XP: ${discente.xpTotal}).`;
         } else {
-            mensagem = `${aluno.GetNome()} cumpriu ${percentual.toFixed(1)}% da meta de treino.`;
+            mensagem = `${discente.GetNome()} cumpriu ${percentual.toFixed(1)}% da meta de estudos da semana (XP: ${discente.xpTotal}).`;
         }
 
         return notificador.EnviarAlerta(
-            personal.GetEmail(),
+            responsavel.GetEmail(),
             mensagem
         );
     }
 }
 
-const servicoAlerta = new ServicoAlertaPersonal();
+const servicoAlerta = new ServicoAlertaResponsavel();
 
 
-// Conexão backend
+// Missão 9: Interface gráfica (HTML + CSS + DOM)
 
 const conectorBackend = new ConectorBackend();
 
-// Exibir os resumos ao carregar a página
+// 1. Cabeçalho de perfil: resultado polimórfico de GerarPainelResumo()
 function atualizarResumos() {
-    document.getElementById("resumoAluno").textContent =
-        aluno.GerarPainelResumo();
+    document.getElementById("resumoDiscente").textContent =
+        discente.GerarPainelResumo();
 
-    document.getElementById("resumoPersonal").textContent =
-        personal.GerarPainelResumo();
+    document.getElementById("resumoResponsavel").textContent =
+        responsavel.GerarPainelResumo();
 }
 
-atualizarResumos();
+// 3. Barra de progresso: reflete meta.CalcularPercentual()
+function atualizarProgresso() {
+    const percentual = meta.CalcularPercentual();
 
-// Ajusta os campos extras conforme o tipo de treino
+    document.getElementById("progressoPreenchido").style.width = `${percentual}%`;
+    document.getElementById("barraMeta").setAttribute("aria-valuenow", percentual.toFixed(0));
+
+    document.getElementById("percentualMeta").textContent =
+        `${percentual.toFixed(1)}% concluído — ${meta.GetMinutosCumpridos()} de ${meta.GetMetaMinutosSemana()} min`;
+}
+
+// 3. Histórico: GerarFeedback() de cada sessão concluída
+function atualizarHistorico() {
+    const lista = document.getElementById("listaFeedback");
+    lista.innerHTML = "";
+
+    const historico = discente.GetHistoricoSessoes();
+
+    if (historico.length === 0) {
+        const vazio = document.createElement("li");
+        vazio.className = "vazio";
+        vazio.textContent = "Nenhuma sessão registrada ainda.";
+        lista.appendChild(vazio);
+        return;
+    }
+
+    historico.forEach(sessao => {
+        const item = document.createElement("li");
+        item.textContent = sessao.GerarFeedback();
+        lista.appendChild(item);
+    });
+}
+
+// 2. Seletor de disciplinas montado a partir das instâncias do Passo 1
+function preencherDisciplinas() {
+    const select = document.getElementById("disciplina");
+
+    Object.entries(disciplinas).forEach(([chave, disciplina]) => {
+        const opcao = document.createElement("option");
+        opcao.value = chave;
+        opcao.textContent = `${disciplina.codigo} — ${disciplina.GetNome()}`;
+        select.appendChild(opcao);
+    });
+}
+
+// Ajusta os campos extras conforme a modalidade escolhida
 const configCamposExtras = {
-    forca: { label1: "Séries completas:", label2: "Carga total levantada (kg):" },
-    cardio: { label1: "Distância percorrida (km):", label2: null },
-    alongamento: { label1: "Posturas realizadas:", label2: "Fez relaxamento? (1 = sim, 0 = não):" }
+    pomodoro: { label: "Ciclos completos:", totalQuestoes: false, resumo: false },
+    exercicios: { label: "Acertos:", totalQuestoes: true, resumo: false },
+    leitura: { label: "Páginas lidas:", totalQuestoes: false, resumo: true }
 };
 
 function atualizarCamposExtras() {
-    const tipo = document.getElementById("tipoTreino").value;
-    const config = configCamposExtras[tipo] || configCamposExtras.forca;
+    const modalidade = document.getElementById("modalidade").value;
+    const config = configCamposExtras[modalidade] || configCamposExtras.pomodoro;
 
-    document.getElementById("labelDadoExtra").textContent = config.label1;
-    document.getElementById("dadoExtra").step = tipo === "cardio" ? "0.1" : "1";
-
-    const campoExtra2 = document.getElementById("campoExtra2");
-    campoExtra2.style.display = config.label2 ? "block" : "none";
-    if (config.label2) {
-        document.getElementById("labelDadoExtra2").textContent = config.label2;
-    }
+    document.getElementById("labelDadoExtra").textContent = config.label;
+    document.getElementById("campoTotalQuestoes").hidden = !config.totalQuestoes;
+    document.getElementById("campoResumo").hidden = !config.resumo;
 }
 
-document.getElementById("tipoTreino").addEventListener("change", atualizarCamposExtras);
+function limparFormulario() {
+    document.getElementById("minutos").value = "";
+    document.getElementById("dadoExtra").value = "";
+    document.getElementById("totalQuestoes").value = "";
+    document.getElementById("fezResumo").checked = false;
+}
+
+preencherDisciplinas();
+atualizarResumos();
+atualizarProgresso();
+atualizarHistorico();
+
+document.getElementById("modalidade").addEventListener("change", atualizarCamposExtras);
 atualizarCamposExtras();
 
-document.getElementById("registrarTreino").addEventListener("click", async () => {
+// Botão "Registrar Estudo": instancia a subclasse correta de SessaoEstudo
+document.getElementById("registrarEstudo").addEventListener("click", async () => {
 
     // 1. Ler os dados do formulário
-    const modalidadeSelecionada = document.getElementById("modalidade").value;
-    const tipoTreino = document.getElementById("tipoTreino").value;
+    const disciplinaSelecionada = document.getElementById("disciplina").value;
+    const modalidade = document.getElementById("modalidade").value;
     const minutos = Number(document.getElementById("minutos").value);
     const dadoExtra = Number(document.getElementById("dadoExtra").value);
-    const dadoExtra2 = Number(document.getElementById("dadoExtra2").value);
+    const totalQuestoes = Number(document.getElementById("totalQuestoes").value);
+    const fezResumo = document.getElementById("fezResumo").checked;
 
-    // 2. Recuperar o objeto Modalidade
-    const modalidade = modalidades[modalidadeSelecionada];
+    // 2. Recuperar o objeto Disciplina
+    const disciplina = disciplinas[disciplinaSelecionada];
 
-    if (
-        !modalidade ||
-        !Number.isInteger(minutos) ||
-        minutos <= 0 ||
-        minutos > 300
-    ) {
-        alert("Selecione uma modalidade e informe uma duração entre 1 e 300 minutos.");
+    if (!disciplina) {
+        alert("Selecione uma disciplina.");
         return;
     }
 
-    // 3. Criar a sessão de treino
+    if (!Number.isInteger(minutos) || minutos <= 0 || minutos > 300) {
+        alert("Informe uma duração entre 1 e 300 minutos.");
+        return;
+    }
+
+    if (!Number.isInteger(dadoExtra) || dadoExtra < 0) {
+        alert("Informe um número inteiro (0 ou mais) no dado extra da modalidade.");
+        return;
+    }
+
+    // 3. Criar a sessão de estudo (subclasse correta)
     let sessao;
 
-    if (tipoTreino === "forca") {
+    if (modalidade === "pomodoro") {
 
-        if (!Number.isInteger(dadoExtra) || dadoExtra < 0 || dadoExtra2 < 0) {
-            alert("Informe a quantidade de séries (número inteiro) e a carga total.");
+        sessao = new SessaoPomodoro(disciplina, minutos, dadoExtra);
+
+    } else if (modalidade === "exercicios") {
+
+        if (!Number.isInteger(totalQuestoes) || totalQuestoes <= 0 || dadoExtra > totalQuestoes) {
+            alert("Informe o total de questões (maior que zero e maior ou igual aos acertos).");
             return;
         }
 
-        sessao = new TreinoForca(modalidade, minutos, dadoExtra, dadoExtra2);
+        sessao = new SessaoExercicios(disciplina, minutos, dadoExtra, totalQuestoes);
 
-    } else if (tipoTreino === "cardio") {
+    } else if (modalidade === "leitura") {
 
-        if (dadoExtra <= 0) {
-            alert("Informe a distância percorrida em km.");
-            return;
-        }
+        sessao = new SessaoLeitura(disciplina, minutos, dadoExtra, fezResumo);
 
-        sessao = new TreinoCardio(modalidade, minutos, dadoExtra);
-
-    } else if (tipoTreino === "alongamento") {
-
-        if (!Number.isInteger(dadoExtra) || dadoExtra < 0 || (dadoExtra2 !== 0 && dadoExtra2 !== 1)) {
-            alert("Informe o número de posturas e 1 ou 0 para o relaxamento.");
-            return;
-        }
-
-        sessao = new TreinoAlongamento(modalidade, minutos, dadoExtra, dadoExtra2 === 1);
-
-    }
-
-    // Impede o registro se a sessão não foi criada
-    if (!sessao) {
-        alert("Selecione um tipo de treino válido.");
+    } else {
+        alert("Selecione uma modalidade válida.");
         return;
     }
 
-    // 4. Registrar localmente
-    aluno.RegistrarTreino(sessao);
+    // 4. Registrar no discente e na meta
+    discente.RegistrarEstudo(sessao);
     meta.RegistrarAvanco(minutos);
 
     atualizarResumos();
+    atualizarProgresso();
+    atualizarHistorico();
+    limparFormulario();
 
-    const percentual = meta.CalcularPercentual();
-
-    document.getElementById("progressoPreenchido").style.width =
-        `${percentual}%`;
-
-    document.getElementById("percentualMeta").textContent =
-        `${percentual.toFixed(1)}% concluído`;
-
-    const item = document.createElement("li");
-    item.textContent = sessao.GerarFeedback();
-
-    document.getElementById("listaFeedback").appendChild(item);
-
-    // 5. Salvar no backend C#
+    // 5. Salvar no backend C# (opcional: sem o servidor, só aparece erro no console)
     try {
-        const resultado = await conectorBackend.salvarTreinoNoBanco(
-            aluno.GetNome(),
+        const resultado = await conectorBackend.salvarSessaoNoBanco(
+            discente.GetNome(),
             sessao
         );
 
-        console.log("Treino salvo no servidor:", resultado);
+        console.log("Sessão salva no servidor:", resultado);
 
     } catch (erro) {
         console.error("Erro ao salvar no servidor:", erro);
     }
 });
 
-// Botão Notificar Personal: usa o INotificador escolhido
-document.getElementById("notificarPersonal").addEventListener("click", () => {
+// Botão "Notificar Responsável": dispara o INotificador escolhido
+document.getElementById("notificarResponsavel").addEventListener("click", () => {
     const canal = document.getElementById("canal").value;
     const notificador = notificadores[canal];
 
-    const enviado = servicoAlerta.AvaliarAluno(aluno, meta, personal, notificador);
+    const enviado = servicoAlerta.AvaliarDiscente(discente, meta, responsavel, notificador);
 
     document.getElementById("statusNotificacao").textContent = enviado
-        ? `Alerta enviado para ${personal.GetNome()} via ${notificador.ObterCanal()}.`
+        ? `Alerta enviado para ${responsavel.GetNome()} via ${notificador.ObterCanal()}.`
         : "Não foi possível enviar o alerta.";
 });

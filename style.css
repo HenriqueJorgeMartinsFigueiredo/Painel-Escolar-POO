@@ -114,6 +114,54 @@ button:hover {
 
 #listaFeedback li {
     padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+#listaFeedback li:last-child {
+    border-bottom: none;
+}
+
+#listaFeedback li.vazio {
+    list-style: none;
+    margin-left: -20px;
+    color: #64748b;
+    font-style: italic;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.campos-numericos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0 16px;
+}
+
+.campo-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.campo-check input {
+    width: auto;
+}
+
+.campo-check label {
+    margin: 0;
+}
+
+.notificacao {
+    margin-top: 24px;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
+}
+
+#statusNotificacao {
+    color: #2a804b;
+    font-weight: bold;
 }
 
 @media (max-width: 600px) {
