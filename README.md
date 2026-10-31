@@ -4,6 +4,10 @@ Mini-projeto de Programação Orientada a Objetos em JavaScript (Oficina PBL), c
 HTML5 + CSS3 + DOM conectada ao backend C# (`BackendEstudoAPI`) e MySQL.
 Baseado em [Exercicio-POO](https://github.com/HenriqueNunes-2008/Exercicio-POO).
 
+![Tela do Painel Escolar](docs/screenshot.png)
+
+**Como abrir:** baixe o repositório e abra o `index.html` no navegador. A tela funciona sozinha; para salvar no MySQL, rode antes o backend C# em `http://localhost:5080`.
+
 ## Arquivos
 
 | Arquivo | Conteúdo |
@@ -73,3 +77,7 @@ JSON enviado no `POST /api/sessoes`:
 4. Registre um estudo e clique em "Carregar Histórico do Servidor" para ver o que foi gravado no banco.
 
 Sem o backend, a tela continua funcionando em memória e avisa que a sessão não foi salva no servidor.
+
+---
+
+Feito por [Henrique Jorge](https://github.com/HenriqueJorgeMartinsFigueiredo).
